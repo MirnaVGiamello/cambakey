@@ -1,0 +1,24 @@
+# Forzar PHP 8.2 solo para esta subcarpeta (Hostinger/LiteSpeed), sin tocar la
+# configuracion de PHP del dominio que comparten otros sistemas.
+<IfModule Litespeed>
+    SetHandler application/x-lsphp82
+</IfModule>
+AddHandler application/x-lsphp82 .php
+
+# Sirve la app desde /cambakey/public/ sin exponer app/, writable/, vendor/, .env
+# Si se cambia el nombre de la subcarpeta en public_html, actualizar "/cambakey/" abajo.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/cambakey/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "^(\.env.*|composer\.(json|lock)|.*\.sql)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

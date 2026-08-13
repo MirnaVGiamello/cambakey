@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><?= $title ?? 'Cambakey' ?> · Cambakey</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  :root{--accent:#C08A2E}
+  body{background:#f5f5f5}
+
+  .sidebar{width:220px;min-height:100vh;background:#1C1C1E;flex-shrink:0;transition:transform .28s}
+  .sidebar .brand{background:#fff;padding:14px 16px;display:flex;justify-content:center}
+  .sidebar .brand img{max-width:100%;height:auto;width:150px}
+  .sidebar .nav-link{color:rgba(255,255,255,.65);padding:9px 16px;border-radius:6px;margin:2px 8px;font-size:.88rem;display:flex;align-items:center;gap:8px}
+  .sidebar .nav-link:hover,.sidebar .nav-link.active{color:#fff;background:rgba(255,255,255,.1)}
+  .sidebar .nav-link i{font-size:1rem;opacity:.8}
+
+  @media(min-width:768px){
+    .sidebar{display:flex!important;flex-direction:column}
+    .btn-menu{display:none!important}
+    .sb-overlay{display:none!important}
+  }
+
+  @media(max-width:767px){
+    .sidebar{
+      position:fixed;top:0;left:0;bottom:0;z-index:1050;
+      display:flex;flex-direction:column;
+      transform:translateX(-100%);min-height:100%;
+    }
+    .sidebar.open{transform:translateX(0)}
+    .sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1049;display:none}
+    .sb-overlay.vis{display:block}
+    .btn-menu{display:flex!important}
+    .main-col{width:100%}
+  }
+
+  .topbar{background:#fff;border-bottom:1px solid #e9ecef;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .brand-link{display:flex;align-items:center;gap:6px;color:#1C1C1E;font-weight:800;font-size:.9rem;text-decoration:none}
+  .brand-link:hover{color:var(--accent)}
+  .brand-link img{height:22px;width:auto}
+  .page-title{font-weight:700;font-size:1.05rem;color:#1C1C1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .content{padding:16px}
+  .btn-brand{background:var(--accent);border:none;color:#fff;font-weight:600}
+  .btn-brand:hover{background:#a3741f;color:#fff}
+  .table-responsive{-webkit-overflow-scrolling:touch}
+</style>
+</head>
+<body>
+
+<div id="sbOverlay" class="sb-overlay"></div>
+
+<div class="d-flex">
+  <div class="sidebar" id="sidebar">
+    <div class="brand"><img src="<?= base_url('images/cambakey.png') ?>" alt="Cambakey"></div>
+    <nav class="flex-grow-1 py-2">
+      <?php $u = current_url(); ?>
+      <?php if (session()->get('perfil') === 'admin'): ?>
+        <a href="<?= site_url('dashboard') ?>" class="nav-link <?= str_contains($u, 'dashboard') ? 'active' : '' ?>"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <?php endif ?>
+      <a href="<?= site_url('productos') ?>" class="nav-link <?= str_contains($u, '/productos') ? 'active' : '' ?>"><i class="bi bi-box-seam"></i> Productos</a>
+      <a href="<?= site_url('stock/bajo') ?>" class="nav-link <?= str_contains($u, 'stock') ? 'active' : '' ?>"><i class="bi bi-exclamation-triangle"></i> Bajo stock</a>
+      <a href="<?= site_url('ventas') ?>" class="nav-link <?= str_contains($u, 'ventas') ? 'active' : '' ?>"><i class="bi bi-cart-check"></i> Ventas</a>
+
+      <?php if (session()->get('perfil') === 'admin'): ?>
+        <hr style="border-color:rgba(255,255,255,.1);margin:8px 16px">
+        <div style="color:rgba(255,255,255,.3);font-size:.68rem;letter-spacing:.1em;padding:4px 16px 2px">ADMINISTRACIÓN</div>
+        <a href="<?= site_url('admin/compras') ?>"        class="nav-link <?= str_contains($u, 'compras') ? 'active' : '' ?>"><i class="bi bi-truck"></i> Compras</a>
+        <a href="<?= site_url('admin/informes/stock-valorizado') ?>" class="nav-link <?= str_contains($u, 'stock-valorizado') ? 'active' : '' ?>"><i class="bi bi-cash-stack"></i> Stock valorizado</a>
+        <a href="<?= site_url('admin/proveedores') ?>"    class="nav-link <?= str_contains($u, 'proveedores') ? 'active' : '' ?>"><i class="bi bi-building"></i> Proveedores</a>
+        <a href="<?= site_url('admin/tipos-producto') ?>" class="nav-link <?= str_contains($u, 'tipos-producto') ? 'active' : '' ?>"><i class="bi bi-tags"></i> Tipos de producto</a>
+        <a href="<?= site_url('admin/talles') ?>"         class="nav-link <?= str_contains($u, 'talles') ? 'active' : '' ?>"><i class="bi bi-rulers"></i> Talles</a>
+        <a href="<?= site_url('admin/colores') ?>"        class="nav-link <?= str_contains($u, 'colores') ? 'active' : '' ?>"><i class="bi bi-palette"></i> Colores</a>
+        <a href="<?= site_url('admin/usuarios') ?>"       class="nav-link <?= str_contains($u, 'usuarios') ? 'active' : '' ?>"><i class="bi bi-people"></i> Usuarios</a>
+      <?php endif ?>
+    </nav>
+  </div>
+
+  <div class="flex-grow-1 main-col" style="min-width:0">
+    <div class="topbar">
+      <div class="d-flex align-items-center gap-2" style="min-width:0;overflow:hidden">
+        <button class="btn btn-sm btn-outline-secondary btn-menu p-1 lh-1" id="btnMenu" style="width:34px;height:34px" aria-label="Menú">
+          <i class="bi bi-list fs-5"></i>
+        </button>
+        <a href="<?= site_url('/') ?>" class="brand-link flex-shrink-0 d-md-none"><img src="<?= base_url('images/cambakey.png') ?>" alt="Cambakey"></a>
+        <span class="page-title text-muted">· <?= $title ?? '' ?></span>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <span class="text-muted small text-nowrap"><i class="bi bi-person-circle me-1"></i><?= esc(session()->get('nombre')) ?></span>
+        <a href="<?= site_url('logout') ?>" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Salir">
+          <i class="bi bi-box-arrow-left"></i>
+        </a>
+      </div>
+    </div>
+
+    <?php if (session()->getFlashdata('ok')): ?>
+      <div class="alert alert-success alert-dismissible m-3 mb-0 py-2" role="alert">
+        <?= esc(session()->getFlashdata('ok')) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <?php endif ?>
+    <?php if (session()->getFlashdata('error')): ?>
+      <div class="alert alert-danger alert-dismissible m-3 mb-0 py-2" role="alert">
+        <?= esc(session()->getFlashdata('error')) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <?php endif ?>
+
+    <div class="content">
+      <?= $content ?>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sbOverlay');
+const btnMenu = document.getElementById('btnMenu');
+
+btnMenu.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('vis');
+});
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('vis');
+});
+sidebar.querySelectorAll('.nav-link').forEach(a => {
+  a.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('vis');
+  });
+});
+
+// Formato de montos: $16,000.00 en pantalla, número plano al enviar el formulario.
+window.CB = window.CB || {};
+CB.formatMoney = function (value) {
+  const num = parseFloat(String(value).replace(/,/g, ''));
+  return isNaN(num) ? '' : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+CB.parseMoney = function (value) {
+  const num = parseFloat(String(value).replace(/,/g, ''));
+  return isNaN(num) ? '' : num;
+};
+
+document.querySelectorAll('.money-input').forEach(function (input) {
+  if (input.value !== '') input.value = CB.formatMoney(input.value);
+  input.addEventListener('blur', function () {
+    if (input.value !== '') input.value = CB.formatMoney(input.value);
+  });
+});
+
+document.querySelectorAll('form').forEach(function (form) {
+  form.addEventListener('submit', function () {
+    form.querySelectorAll('.money-input').forEach(function (input) {
+      if (input.value !== '') input.value = CB.parseMoney(input.value);
+    });
+  });
+});
+</script>
+</body>
+</html>
