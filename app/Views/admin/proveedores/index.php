@@ -10,12 +10,13 @@
 <div class="card shadow-sm border-0">
   <div class="table-responsive">
     <table class="table table-hover mb-0 small align-middle">
-      <thead class="table-light"><tr><th>Nombre</th><th>Domicilio</th><th>Contacto</th><th class="text-center">Activo</th><th></th></tr></thead>
+      <thead class="table-light"><tr><th>ID</th><th>Nombre</th><th class="d-none d-md-table-cell">Domicilio</th><th>Contacto</th><th class="text-center">Activo</th><th></th></tr></thead>
       <tbody>
         <?php foreach ($proveedores as $p): ?>
         <tr>
+          <td><?= $p['id'] ?></td>
           <td><?= esc($p['nombre']) ?></td>
-          <td><?= esc($p['domicilio']) ?></td>
+          <td class="d-none d-md-table-cell"><?= esc($p['domicilio']) ?></td>
           <td><?= esc($p['contacto']) ?></td>
           <td class="text-center"><?= $p['activo'] ? '<span class="badge bg-success">Sí</span>' : '<span class="badge bg-secondary">No</span>' ?></td>
           <td class="text-end">
@@ -29,7 +30,7 @@
         </tr>
         <?php endforeach ?>
         <?php if (empty($proveedores)): ?>
-        <tr><td colspan="5" class="text-center text-muted py-4">Sin proveedores.</td></tr>
+        <tr><td colspan="6" class="text-center text-muted py-4">Sin proveedores.</td></tr>
         <?php endif ?>
       </tbody>
     </table>

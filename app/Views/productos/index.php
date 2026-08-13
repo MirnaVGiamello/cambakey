@@ -70,20 +70,21 @@
     <table class="table table-hover mb-0 small align-middle">
       <thead class="table-light">
         <tr>
-          <th>Descripción</th><th>Tipo</th><th>Proveedor</th><th>Talle</th><th>Color</th>
-          <?php if ($esAdmin): ?><th class="text-end">Costo</th><?php endif ?>
+          <th>ID</th><th>Descripción</th><th class="d-none d-md-table-cell">Tipo</th><th class="d-none d-md-table-cell">Proveedor</th><th>Talle</th><th>Color</th>
+          <?php if ($esAdmin): ?><th class="text-end d-none d-md-table-cell">Costo</th><?php endif ?>
           <th class="text-end">Precio</th><th class="text-center">Stock</th><?php if ($esAdmin): ?><th></th><?php endif ?>
         </tr>
       </thead>
       <tbody>
         <?php foreach ($productos as $p): ?>
         <tr>
+          <td><?= $p['id'] ?></td>
           <td><?= esc($p['descripcion']) ?></td>
-          <td><?= esc($p['tipo_nombre']) ?></td>
-          <td><?= esc($p['proveedor_nombre']) ?></td>
+          <td class="d-none d-md-table-cell"><?= esc($p['tipo_nombre']) ?></td>
+          <td class="d-none d-md-table-cell"><?= esc($p['proveedor_nombre']) ?></td>
           <td><?= esc($p['talle_nombre']) ?></td>
           <td><?= esc($p['color_nombre']) ?></td>
-          <?php if ($esAdmin): ?><td class="text-end">$<?= number_format($p['costo'], 2) ?></td><?php endif ?>
+          <?php if ($esAdmin): ?><td class="text-end d-none d-md-table-cell">$<?= number_format($p['costo'], 2) ?></td><?php endif ?>
           <td class="text-end">$<?= number_format($p['precio_venta'], 2) ?></td>
           <td class="text-center">
             <span class="badge <?= $p['stock_actual'] <= $p['stock_minimo'] ? 'bg-danger' : 'bg-success' ?>"><?= $p['stock_actual'] ?></span>
@@ -101,7 +102,7 @@
         </tr>
         <?php endforeach ?>
         <?php if (empty($productos)): ?>
-        <tr><td colspan="9" class="text-center text-muted py-4">No hay productos que coincidan con la búsqueda.</td></tr>
+        <tr><td colspan="10" class="text-center text-muted py-4">No hay productos que coincidan con la búsqueda.</td></tr>
         <?php endif ?>
       </tbody>
     </table>

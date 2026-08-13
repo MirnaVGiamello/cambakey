@@ -59,10 +59,11 @@
   <div class="card-header bg-white fw-semibold">Detalle</div>
   <div class="table-responsive">
     <table class="table table-hover mb-0 small align-middle">
-      <thead class="table-light"><tr><th>Fecha</th><th>Producto</th><th>Talle</th><th>Color</th><th class="text-center">Cant.</th><th class="text-end">Precio</th><th class="text-end">Total</th></tr></thead>
+      <thead class="table-light"><tr><th>ID</th><th>Fecha</th><th>Producto</th><th>Talle</th><th>Color</th><th class="text-center">Cant.</th><th class="text-end">Precio</th><th class="text-end">Total</th></tr></thead>
       <tbody>
         <?php foreach ($ventas as $v): ?>
         <tr>
+          <td><?= $v['id'] ?></td>
           <td><?= esc(date('d/m/Y H:i', strtotime($v['fecha']))) ?></td>
           <td><?= esc($v['descripcion']) ?></td>
           <td><?= esc($v['talle_nombre']) ?></td>
@@ -73,7 +74,7 @@
         </tr>
         <?php endforeach ?>
         <?php if (empty($ventas)): ?>
-        <tr><td colspan="7" class="text-center text-muted py-4">No hay ventas registradas en este período.</td></tr>
+        <tr><td colspan="8" class="text-center text-muted py-4">No hay ventas registradas en este período.</td></tr>
         <?php endif ?>
       </tbody>
     </table>
