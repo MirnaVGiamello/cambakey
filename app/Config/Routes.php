@@ -80,6 +80,18 @@ $routes->group('', ['filter' => 'admin'], function ($routes) {
         $routes->post('usuarios/actualizar/(:num)', 'Admin\Usuarios::actualizar/$1');
         $routes->post('usuarios/eliminar/(:num)',   'Admin\Usuarios::eliminar/$1');
 
+        $routes->get( 'tipos-gasto',                'Admin\TiposGasto::index');
+        $routes->get( 'tipos-gasto/nuevo',          'Admin\TiposGasto::nuevo');
+        $routes->post('tipos-gasto/guardar',        'Admin\TiposGasto::guardar');
+        $routes->get( 'tipos-gasto/editar/(:num)',  'Admin\TiposGasto::editar/$1');
+        $routes->post('tipos-gasto/actualizar/(:num)', 'Admin\TiposGasto::actualizar/$1');
+        $routes->post('tipos-gasto/eliminar/(:num)',   'Admin\TiposGasto::eliminar/$1');
+
+        $routes->get( 'gastos',         'Admin\Gastos::index');
+        $routes->get( 'gastos/nuevo',   'Admin\Gastos::nuevo');
+        $routes->post('gastos/guardar', 'Admin\Gastos::guardar');
+
         $routes->get('informes/stock-valorizado', 'Admin\Informes::stockValorizado');
+        $routes->get('informes/ventas-grafico',   'Admin\Informes::ventasGrafico');
     });
 });

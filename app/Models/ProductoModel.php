@@ -28,6 +28,7 @@ class ProductoModel extends Model
         if (!empty($filtros['proveedor_id']))     $builder->where('productos.proveedor_id', $filtros['proveedor_id']);
         if (!empty($filtros['talle_id']))         $builder->where('productos.talle_id', $filtros['talle_id']);
         if (!empty($filtros['color_id']))         $builder->where('productos.color_id', $filtros['color_id']);
+        if (!empty($filtros['descripcion']))      $builder->where('productos.descripcion', $filtros['descripcion']);
         if (!empty($filtros['texto']))            $builder->like('productos.descripcion', $filtros['texto']);
         if (($filtros['stock'] ?? '') === 'bajo') $builder->where('productos.stock_actual <=', 'productos.stock_minimo', false);
         if (($filtros['stock'] ?? '') === 'ok')   $builder->where('productos.stock_actual >', 'productos.stock_minimo', false);

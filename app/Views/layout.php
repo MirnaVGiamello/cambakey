@@ -45,6 +45,9 @@
   .btn-brand{background:var(--accent);border:none;color:#fff;font-weight:600}
   .btn-brand:hover{background:#a3741f;color:#fff}
   .table-responsive{-webkit-overflow-scrolling:touch}
+  th.th-sortable{cursor:pointer;user-select:none;white-space:nowrap}
+  th.th-sortable:hover{background:rgba(0,0,0,.05)}
+  th.th-sortable .sort-icon{opacity:.6;font-size:.85em}
 </style>
 </head>
 <body>
@@ -68,11 +71,14 @@
         <div style="color:rgba(255,255,255,.3);font-size:.68rem;letter-spacing:.1em;padding:4px 16px 2px">ADMINISTRACIÓN</div>
         <a href="<?= site_url('admin/compras') ?>"        class="nav-link <?= str_contains($u, 'compras') ? 'active' : '' ?>"><i class="bi bi-truck"></i> Compras</a>
         <a href="<?= site_url('admin/informes/stock-valorizado') ?>" class="nav-link <?= str_contains($u, 'stock-valorizado') ? 'active' : '' ?>"><i class="bi bi-cash-stack"></i> Stock valorizado</a>
+        <a href="<?= site_url('admin/informes/ventas-grafico') ?>" class="nav-link <?= str_contains($u, 'ventas-grafico') ? 'active' : '' ?>"><i class="bi bi-bar-chart-line"></i> Ventas (gráfico)</a>
         <a href="<?= site_url('admin/proveedores') ?>"    class="nav-link <?= str_contains($u, 'proveedores') ? 'active' : '' ?>"><i class="bi bi-building"></i> Proveedores</a>
         <a href="<?= site_url('admin/tipos-producto') ?>" class="nav-link <?= str_contains($u, 'tipos-producto') ? 'active' : '' ?>"><i class="bi bi-tags"></i> Tipos de producto</a>
         <a href="<?= site_url('admin/talles') ?>"         class="nav-link <?= str_contains($u, 'talles') ? 'active' : '' ?>"><i class="bi bi-rulers"></i> Talles</a>
         <a href="<?= site_url('admin/colores') ?>"        class="nav-link <?= str_contains($u, 'colores') ? 'active' : '' ?>"><i class="bi bi-palette"></i> Colores</a>
         <a href="<?= site_url('admin/usuarios') ?>"       class="nav-link <?= str_contains($u, 'usuarios') ? 'active' : '' ?>"><i class="bi bi-people"></i> Usuarios</a>
+        <a href="<?= site_url('admin/gastos') ?>"         class="nav-link <?= str_contains($u, '/gastos') ? 'active' : '' ?>"><i class="bi bi-wallet2"></i> Gastos</a>
+        <a href="<?= site_url('admin/tipos-gasto') ?>"    class="nav-link <?= str_contains($u, 'tipos-gasto') ? 'active' : '' ?>"><i class="bi bi-tags"></i> Tipos de gasto</a>
       <?php endif ?>
     </nav>
   </div>
@@ -156,6 +162,62 @@ document.querySelectorAll('form').forEach(function (form) {
   form.addEventListener('submit', function () {
     form.querySelectorAll('.money-input').forEach(function (input) {
       if (input.value !== '') input.value = CB.parseMoney(input.value);
+    });
+  });
+});
+
+// Ordenamiento por click en el header, aplicado a todas las grillas de listado.
+function cbSortCellValue(text) {
+  text = text.trim();
+  if (text === '') return null;
+  const fecha = text.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
+  if (fecha) {
+    const [, d, mo, y, h, mi] = fecha;
+    return new Date(`${y}-${mo}-${d}T${h || '00'}:${mi || '00'}:00`).getTime();
+  }
+  const limpio = text.replace(/[$%\s]/g, '').replace(/,/g, '');
+  if (limpio !== '' && !isNaN(limpio)) return parseFloat(limpio);
+  return null;
+}
+
+function cbCompareRows(a, b, col, dir) {
+  const ta = (a.children[col] && a.children[col].textContent || '').trim();
+  const tb = (b.children[col] && b.children[col].textContent || '').trim();
+  const na = cbSortCellValue(ta), nb = cbSortCellValue(tb);
+  const cmp = (na !== null && nb !== null)
+    ? na - nb
+    : ta.localeCompare(tb, 'es', { numeric: true, sensitivity: 'base' });
+  return dir === 'asc' ? cmp : -cmp;
+}
+
+document.querySelectorAll('table').forEach(function (table) {
+  if (table.id === 'tablaVariantes' || !table.tHead) return;
+  const headerRow = table.tHead.rows[table.tHead.rows.length - 1];
+  const ths = Array.from(headerRow.cells);
+  let sortState = { col: -1, dir: 'asc' };
+
+  ths.forEach(function (th, col) {
+    if (th.textContent.trim() === '') return;
+    th.classList.add('th-sortable');
+    th.insertAdjacentHTML('beforeend', ' <i class="bi bi-arrow-down-up sort-icon"></i>');
+
+    th.addEventListener('click', function () {
+      const tbody = table.tBodies[0];
+      if (!tbody) return;
+      const rows = Array.from(tbody.rows).filter(r => r.cells.length === ths.length);
+      if (rows.length < 2) return;
+
+      const dir = (sortState.col === col && sortState.dir === 'asc') ? 'desc' : 'asc';
+      sortState = { col, dir };
+
+      rows.sort((a, b) => cbCompareRows(a, b, col, dir));
+      rows.forEach(r => tbody.appendChild(r));
+
+      ths.forEach(function (h, i) {
+        const icon = h.querySelector('.sort-icon');
+        if (!icon) return;
+        icon.className = 'bi sort-icon ' + (i === col ? (dir === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up');
+      });
     });
   });
 });

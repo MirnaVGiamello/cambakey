@@ -8,6 +8,15 @@
         <input type="text" name="texto" class="form-control form-control-sm" value="<?= esc($filtros['texto'] ?? '') ?>" placeholder="Descripción...">
       </div>
       <div class="col-6 col-md-2">
+        <label class="form-label small mb-1">Producto (base)</label>
+        <select name="descripcion" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <?php foreach (array_unique(array_column($productosTodos, 'descripcion')) as $desc): ?>
+            <option value="<?= esc($desc, 'attr') ?>" <?= ($filtros['descripcion'] ?? '') === $desc ? 'selected' : '' ?>><?= esc($desc) ?></option>
+          <?php endforeach ?>
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
         <label class="form-label small mb-1">Tipo</label>
         <select name="tipo_producto_id" class="form-select form-select-sm">
           <option value="">Todos</option>

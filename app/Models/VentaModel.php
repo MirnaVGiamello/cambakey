@@ -37,4 +37,16 @@ class VentaModel extends Model
 
         return $builder->groupBy('ventas.producto_id')->orderBy('total', 'DESC')->findAll();
     }
+
+    public function serieTemporal(array $filtros = [], string $corte = 'dia'): array
+    {
+        $formato = $corte === 'mes' ? '%Y-%m' : '%Y-%m-%d';
+
+        $builder = $this->select("DATE_FORMAT(ventas.fecha, '{$formato}') AS periodo, SUM(ventas.cantidad) AS cantidad, SUM(ventas.cantidad * ventas.precio) AS total");
+
+        if (!empty($filtros['desde'])) $builder->where('ventas.fecha >=', $filtros['desde'] . ' 00:00:00');
+        if (!empty($filtros['hasta'])) $builder->where('ventas.fecha <=', $filtros['hasta'] . ' 23:59:59');
+
+        return $builder->groupBy('periodo')->orderBy('periodo', 'ASC')->findAll();
+    }
 }

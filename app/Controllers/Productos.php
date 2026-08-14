@@ -34,13 +34,15 @@ class Productos extends BaseController
             'proveedor_id'     => $this->request->getGet('proveedor_id'),
             'talle_id'         => $this->request->getGet('talle_id'),
             'color_id'         => $this->request->getGet('color_id'),
+            'descripcion'      => $this->request->getGet('descripcion'),
             'texto'            => $this->request->getGet('texto'),
             'stock'            => $this->request->getGet('stock'),
         ];
 
         return view('productos/index', array_merge($this->combos(), [
-            'productos' => $this->model->filtrar($filtros),
-            'filtros'   => $filtros,
+            'productos'      => $this->model->filtrar($filtros),
+            'productosTodos' => $this->model->filtrar(),
+            'filtros'        => $filtros,
         ]));
     }
 
