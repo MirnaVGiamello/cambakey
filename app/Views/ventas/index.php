@@ -59,7 +59,8 @@
   <div class="card-header bg-white fw-semibold">Detalle</div>
   <div class="table-responsive">
     <table class="table table-hover mb-0 small align-middle">
-      <thead class="table-light"><tr><th>ID</th><th>Fecha</th><th>Producto</th><th>Talle</th><th>Color</th><th class="text-center">Cant.</th><th class="text-end">Precio</th><th class="text-end">Total</th></tr></thead>
+      <?php $esAdmin = session()->get('perfil') === 'admin'; ?>
+      <thead class="table-light"><tr><th>ID</th><th>Fecha</th><th>Producto</th><th>Talle</th><th>Color</th><th class="text-center">Cant.</th><th class="text-end">Precio</th><th class="text-end">Total</th><?php if ($esAdmin): ?><th></th><?php endif ?></tr></thead>
       <tbody>
         <?php foreach ($ventas as $v): ?>
         <tr>
@@ -71,10 +72,19 @@
           <td class="text-center"><?= $v['cantidad'] ?></td>
           <td class="text-end">$<?= number_format($v['precio'], 2) ?></td>
           <td class="text-end">$<?= number_format($v['cantidad'] * $v['precio'], 2) ?></td>
+          <?php if ($esAdmin): ?>
+          <td class="text-end">
+            <form method="post" action="<?= site_url('ventas/eliminar/' . $v['id']) ?>" class="d-inline"
+                  onsubmit="return confirm('¿Eliminar esta venta? Se repondrá el stock.')">
+              <?= csrf_field() ?>
+              <button class="btn btn-sm btn-outline-danger py-0 px-2"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+          <?php endif ?>
         </tr>
         <?php endforeach ?>
         <?php if (empty($ventas)): ?>
-        <tr><td colspan="8" class="text-center text-muted py-4">No hay ventas registradas en este período.</td></tr>
+        <tr><td colspan="<?= $esAdmin ? 9 : 8 ?>" class="text-center text-muted py-4">No hay ventas registradas en este período.</td></tr>
         <?php endif ?>
       </tbody>
     </table>

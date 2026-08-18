@@ -27,6 +27,11 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('ventas/guardar', 'Ventas::guardar');
 });
 
+// Borrado de ventas: solo admin, aunque la carga sea para ambos perfiles.
+$routes->group('', ['filter' => 'admin'], function ($routes) {
+    $routes->post('ventas/eliminar/(:num)', 'Ventas::eliminar/$1');
+});
+
 // Administración: solo perfil admin
 $routes->group('', ['filter' => 'admin'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
@@ -72,6 +77,7 @@ $routes->group('', ['filter' => 'admin'], function ($routes) {
         $routes->get( 'compras',         'Admin\Compras::index');
         $routes->get( 'compras/nueva',   'Admin\Compras::nueva');
         $routes->post('compras/guardar', 'Admin\Compras::guardar');
+        $routes->post('compras/eliminar/(:num)', 'Admin\Compras::eliminar/$1');
 
         $routes->get( 'usuarios',                'Admin\Usuarios::index');
         $routes->get( 'usuarios/nuevo',          'Admin\Usuarios::nuevo');
@@ -93,5 +99,7 @@ $routes->group('', ['filter' => 'admin'], function ($routes) {
 
         $routes->get('informes/stock-valorizado', 'Admin\Informes::stockValorizado');
         $routes->get('informes/ventas-grafico',   'Admin\Informes::ventasGrafico');
+
+        $routes->get('eliminaciones', 'Admin\Eliminaciones::index');
     });
 });

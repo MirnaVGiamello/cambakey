@@ -2,6 +2,7 @@
 namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Models\CompraModel;
+use App\Models\EliminacionModel;
 use App\Models\ProductoModel;
 use App\Models\ProveedorModel;
 
@@ -85,5 +86,24 @@ class Compras extends BaseController
         $mensaje   = $lineas === 1 ? 'Compra registrada.' : "Compra registrada: {$lineas} variantes, {$unidades} unidades en total.";
 
         return redirect()->to('/admin/compras')->with('ok', $mensaje);
+    }
+
+    public function eliminar(int $id)
+    {
+        $compra = $this->model->find($id);
+        if (!$compra) {
+            return redirect()->to('/admin/compras')->with('error', 'La compra no existe.');
+        }
+
+        $db = db_connect();
+        $db->transStart();
+
+        (new EliminacionModel())->registrar('compra', $compra);
+        $this->productoModel->decrementarStock($compra['producto_id'], $compra['cantidad']);
+        $this->model->delete($id);
+
+        $db->transComplete();
+
+        return redirect()->to('/admin/compras')->with('ok', 'Compra eliminada.');
     }
 }

@@ -16,6 +16,12 @@
   .sidebar .nav-link{color:rgba(255,255,255,.65);padding:9px 16px;border-radius:6px;margin:2px 8px;font-size:.88rem;display:flex;align-items:center;gap:8px}
   .sidebar .nav-link:hover,.sidebar .nav-link.active{color:#fff;background:rgba(255,255,255,.1)}
   .sidebar .nav-link i{font-size:1rem;opacity:.8}
+  .sidebar .nav-link.nav-sub{padding-left:34px;font-size:.83rem}
+  .sidebar .nav-group-btn{width:calc(100% - 16px);background:none;border:none;text-align:left;color:rgba(255,255,255,.65);padding:9px 16px;border-radius:6px;margin:2px 8px;font-size:.88rem;display:flex;align-items:center;gap:8px;cursor:pointer}
+  .sidebar .nav-group-btn:hover,.sidebar .nav-group-btn.active{color:#fff;background:rgba(255,255,255,.1)}
+  .sidebar .nav-group-btn i:first-child{font-size:1rem;opacity:.8}
+  .sidebar .nav-group-btn .chevron{margin-left:auto;font-size:.7rem;opacity:.6;transition:transform .2s}
+  .sidebar .nav-group-btn[aria-expanded="true"] .chevron{transform:rotate(180deg)}
 
   @media(min-width:768px){
     .sidebar{display:flex!important;flex-direction:column}
@@ -67,18 +73,36 @@
       <a href="<?= site_url('ventas') ?>" class="nav-link <?= str_contains($u, 'ventas') ? 'active' : '' ?>"><i class="bi bi-cart-check"></i> Ventas</a>
 
       <?php if (session()->get('perfil') === 'admin'): ?>
+        <?php
+          $informesAbierto = str_contains($u, 'stock-valorizado') || str_contains($u, 'ventas-grafico') || str_contains($u, 'eliminaciones');
+          $tablasAbierto   = str_contains($u, 'proveedores') || str_contains($u, 'tipos-producto') || str_contains($u, 'talles') || str_contains($u, 'colores') || str_contains($u, 'tipos-gasto');
+        ?>
         <hr style="border-color:rgba(255,255,255,.1);margin:8px 16px">
         <div style="color:rgba(255,255,255,.3);font-size:.68rem;letter-spacing:.1em;padding:4px 16px 2px">ADMINISTRACIÓN</div>
-        <a href="<?= site_url('admin/compras') ?>"        class="nav-link <?= str_contains($u, 'compras') ? 'active' : '' ?>"><i class="bi bi-truck"></i> Compras</a>
-        <a href="<?= site_url('admin/informes/stock-valorizado') ?>" class="nav-link <?= str_contains($u, 'stock-valorizado') ? 'active' : '' ?>"><i class="bi bi-cash-stack"></i> Stock valorizado</a>
-        <a href="<?= site_url('admin/informes/ventas-grafico') ?>" class="nav-link <?= str_contains($u, 'ventas-grafico') ? 'active' : '' ?>"><i class="bi bi-bar-chart-line"></i> Ventas (gráfico)</a>
-        <a href="<?= site_url('admin/proveedores') ?>"    class="nav-link <?= str_contains($u, 'proveedores') ? 'active' : '' ?>"><i class="bi bi-building"></i> Proveedores</a>
-        <a href="<?= site_url('admin/tipos-producto') ?>" class="nav-link <?= str_contains($u, 'tipos-producto') ? 'active' : '' ?>"><i class="bi bi-tags"></i> Tipos de producto</a>
-        <a href="<?= site_url('admin/talles') ?>"         class="nav-link <?= str_contains($u, 'talles') ? 'active' : '' ?>"><i class="bi bi-rulers"></i> Talles</a>
-        <a href="<?= site_url('admin/colores') ?>"        class="nav-link <?= str_contains($u, 'colores') ? 'active' : '' ?>"><i class="bi bi-palette"></i> Colores</a>
-        <a href="<?= site_url('admin/usuarios') ?>"       class="nav-link <?= str_contains($u, 'usuarios') ? 'active' : '' ?>"><i class="bi bi-people"></i> Usuarios</a>
-        <a href="<?= site_url('admin/gastos') ?>"         class="nav-link <?= str_contains($u, '/gastos') ? 'active' : '' ?>"><i class="bi bi-wallet2"></i> Gastos</a>
-        <a href="<?= site_url('admin/tipos-gasto') ?>"    class="nav-link <?= str_contains($u, 'tipos-gasto') ? 'active' : '' ?>"><i class="bi bi-tags"></i> Tipos de gasto</a>
+        <a href="<?= site_url('admin/compras') ?>" class="nav-link <?= str_contains($u, 'compras') ? 'active' : '' ?>"><i class="bi bi-truck"></i> Compras</a>
+        <a href="<?= site_url('admin/gastos') ?>"   class="nav-link <?= str_contains($u, '/gastos') ? 'active' : '' ?>"><i class="bi bi-wallet2"></i> Gastos</a>
+
+        <button type="button" class="nav-group-btn <?= $informesAbierto ? 'active' : '' ?>" data-bs-toggle="collapse" data-bs-target="#navInformes" aria-expanded="<?= $informesAbierto ? 'true' : 'false' ?>">
+          <i class="bi bi-graph-up"></i> Informes <i class="bi bi-chevron-down chevron"></i>
+        </button>
+        <div class="collapse <?= $informesAbierto ? 'show' : '' ?>" id="navInformes">
+          <a href="<?= site_url('admin/informes/stock-valorizado') ?>" class="nav-link nav-sub <?= str_contains($u, 'stock-valorizado') ? 'active' : '' ?>"><i class="bi bi-cash-stack"></i> Stock valorizado</a>
+          <a href="<?= site_url('admin/informes/ventas-grafico') ?>"   class="nav-link nav-sub <?= str_contains($u, 'ventas-grafico') ? 'active' : '' ?>"><i class="bi bi-bar-chart-line"></i> Ventas (gráfico)</a>
+          <a href="<?= site_url('admin/eliminaciones') ?>"              class="nav-link nav-sub <?= str_contains($u, 'eliminaciones') ? 'active' : '' ?>"><i class="bi bi-clock-history"></i> Eliminados</a>
+        </div>
+
+        <button type="button" class="nav-group-btn <?= $tablasAbierto ? 'active' : '' ?>" data-bs-toggle="collapse" data-bs-target="#navTablas" aria-expanded="<?= $tablasAbierto ? 'true' : 'false' ?>">
+          <i class="bi bi-table"></i> Tablas <i class="bi bi-chevron-down chevron"></i>
+        </button>
+        <div class="collapse <?= $tablasAbierto ? 'show' : '' ?>" id="navTablas">
+          <a href="<?= site_url('admin/proveedores') ?>"    class="nav-link nav-sub <?= str_contains($u, 'proveedores') ? 'active' : '' ?>"><i class="bi bi-building"></i> Proveedores</a>
+          <a href="<?= site_url('admin/tipos-producto') ?>" class="nav-link nav-sub <?= str_contains($u, 'tipos-producto') ? 'active' : '' ?>"><i class="bi bi-tags"></i> Tipos de producto</a>
+          <a href="<?= site_url('admin/talles') ?>"         class="nav-link nav-sub <?= str_contains($u, 'talles') ? 'active' : '' ?>"><i class="bi bi-rulers"></i> Talles</a>
+          <a href="<?= site_url('admin/colores') ?>"        class="nav-link nav-sub <?= str_contains($u, 'colores') ? 'active' : '' ?>"><i class="bi bi-palette"></i> Colores</a>
+          <a href="<?= site_url('admin/tipos-gasto') ?>"    class="nav-link nav-sub <?= str_contains($u, 'tipos-gasto') ? 'active' : '' ?>"><i class="bi bi-tags"></i> Tipos de gasto</a>
+        </div>
+
+        <a href="<?= site_url('admin/usuarios') ?>" class="nav-link <?= str_contains($u, 'usuarios') ? 'active' : '' ?>"><i class="bi bi-people"></i> Usuarios</a>
       <?php endif ?>
     </nav>
   </div>

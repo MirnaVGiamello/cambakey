@@ -67,7 +67,7 @@
 <div class="card shadow-sm border-0">
   <div class="table-responsive">
     <table class="table table-hover mb-0 small align-middle">
-      <thead class="table-light"><tr><th>ID</th><th>Fecha</th><th>Proveedor</th><th>Producto</th><th>Talle</th><th>Color</th><th class="text-center">Cant.</th><th class="text-end">Precio</th><th class="text-end">Total</th></tr></thead>
+      <thead class="table-light"><tr><th>ID</th><th>Fecha</th><th>Proveedor</th><th>Producto</th><th>Talle</th><th>Color</th><th class="text-center">Cant.</th><th class="text-end">Precio</th><th class="text-end">Total</th><th></th></tr></thead>
       <tbody>
         <?php foreach ($compras as $c): ?>
         <tr>
@@ -80,10 +80,17 @@
           <td class="text-center"><?= $c['cantidad'] ?></td>
           <td class="text-end">$<?= number_format($c['precio'], 2) ?></td>
           <td class="text-end">$<?= number_format($c['cantidad'] * $c['precio'], 2) ?></td>
+          <td class="text-end">
+            <form method="post" action="<?= site_url('admin/compras/eliminar/' . $c['id']) ?>" class="d-inline"
+                  onsubmit="return confirm('¿Eliminar esta compra? Se descontará del stock.')">
+              <?= csrf_field() ?>
+              <button class="btn btn-sm btn-outline-danger py-0 px-2"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
         </tr>
         <?php endforeach ?>
         <?php if (empty($compras)): ?>
-        <tr><td colspan="9" class="text-center text-muted py-4">No hay compras registradas en este período.</td></tr>
+        <tr><td colspan="10" class="text-center text-muted py-4">No hay compras registradas en este período.</td></tr>
         <?php endif ?>
       </tbody>
     </table>

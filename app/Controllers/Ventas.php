@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\VentaModel;
 use App\Models\ProductoModel;
+use App\Models\EliminacionModel;
 
 class Ventas extends BaseController
 {
@@ -75,5 +76,24 @@ class Ventas extends BaseController
         }
 
         return redirect()->to('/ventas')->with('ok', 'Venta registrada.');
+    }
+
+    public function eliminar(int $id)
+    {
+        $venta = $this->model->find($id);
+        if (!$venta) {
+            return redirect()->to('/ventas')->with('error', 'La venta no existe.');
+        }
+
+        $db = db_connect();
+        $db->transStart();
+
+        (new EliminacionModel())->registrar('venta', $venta);
+        $this->productoModel->incrementarStock($venta['producto_id'], $venta['cantidad']);
+        $this->model->delete($id);
+
+        $db->transComplete();
+
+        return redirect()->to('/ventas')->with('ok', 'Venta eliminada.');
     }
 }
