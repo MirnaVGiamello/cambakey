@@ -3,7 +3,7 @@
   <a href="<?= site_url('productos') ?>" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left me-1"></i>Volver</a>
   <div class="card shadow-sm border-0">
     <div class="card-body">
-      <form method="post" action="<?= $esNuevo ? site_url('productos/guardar') : site_url('productos/actualizar/' . $producto['id']) ?>">
+      <form method="post" enctype="multipart/form-data" action="<?= $esNuevo ? site_url('productos/guardar') : site_url('productos/actualizar/' . $producto['id']) ?>">
         <?= csrf_field() ?>
 
         <div class="mb-3">
@@ -116,6 +116,19 @@
           <label class="form-label fw-semibold">Observación</label>
           <textarea name="observacion" class="form-control" rows="2"><?= esc($producto['observacion'] ?? '') ?></textarea>
         </div>
+
+        <?php if (!$esNuevo): ?>
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Foto</label>
+          <?php if (!empty($producto['foto'])): ?>
+            <div class="mb-2">
+              <img src="<?= site_url('productos/foto/' . $producto['foto']) ?>" alt="" style="max-width:160px;max-height:160px;border-radius:8px;border:1px solid #dee2e6;object-fit:cover">
+            </div>
+          <?php endif ?>
+          <input type="file" name="foto" class="form-control" accept="image/jpeg,image/png,image/webp">
+          <div class="form-text">JPG, PNG o WEBP, hasta 3 MB. Se aplica a todos los talles de este mismo color.</div>
+        </div>
+        <?php endif ?>
 
         <button type="submit" class="btn btn-brand w-100"><?= $esNuevo ? 'Crear producto(s)' : 'Guardar' ?></button>
       </form>

@@ -48,42 +48,44 @@ class Compras extends BaseController
 
     public function guardar()
     {
-        $precio     = $this->limpiarMonto($this->request->getPost('precio')) ?? 0;
-        $cantidades = (array) $this->request->getPost('cantidades');
+        $productoIds = (array) $this->request->getPost('producto_id');
+        $cantidades  = (array) $this->request->getPost('cantidad');
+        $precios     = (array) $this->request->getPost('precio');
 
-        $items = [];
-        foreach ($cantidades as $productoId => $cantidad) {
-            $cantidad = (int) $cantidad;
-            if ($cantidad > 0) {
-                $items[(int) $productoId] = $cantidad;
-            }
+        $lineas = [];
+        foreach ($productoIds as $i => $productoId) {
+            $cantidad = (int) ($cantidades[$i] ?? 0);
+            $precio   = $this->limpiarMonto($precios[$i] ?? null) ?? 0;
+            $producto = $this->productoModel->find((int) $productoId);
+
+            if (!$producto || $cantidad <= 0 || $precio <= 0) continue;
+
+            $lineas[] = ['producto' => $producto, 'cantidad' => $cantidad, 'precio' => $precio];
         }
 
-        if (!$items || $precio <= 0) {
-            return redirect()->to('/admin/compras/nueva')->with('error', 'Ingresá el precio y al menos una cantidad.')->withInput();
+        if (!$lineas) {
+            return redirect()->to('/admin/compras/nueva')->with('error', 'Agregá al menos un producto válido a la compra.')->withInput();
         }
 
         $db = db_connect();
         $db->transStart();
 
-        foreach ($items as $productoId => $cantidad) {
-            if (!$this->productoModel->find($productoId)) continue;
-
+        foreach ($lineas as $l) {
             $this->model->insert([
                 'fecha'       => date('Y-m-d H:i:s'),
-                'producto_id' => $productoId,
-                'cantidad'    => $cantidad,
-                'precio'      => $precio,
+                'producto_id' => $l['producto']['id'],
+                'cantidad'    => $l['cantidad'],
+                'precio'      => $l['precio'],
                 'usuario_id'  => session()->get('usuario_id'),
             ]);
-            $this->productoModel->incrementarStock($productoId, $cantidad);
+            $this->productoModel->incrementarStock($l['producto']['id'], $l['cantidad']);
         }
 
         $db->transComplete();
 
-        $lineas    = count($items);
-        $unidades  = array_sum($items);
-        $mensaje   = $lineas === 1 ? 'Compra registrada.' : "Compra registrada: {$lineas} variantes, {$unidades} unidades en total.";
+        $cantidadLineas = count($lineas);
+        $unidades       = array_sum(array_column($lineas, 'cantidad'));
+        $mensaje        = $cantidadLineas === 1 ? 'Compra registrada.' : "Compra registrada: {$cantidadLineas} variantes, {$unidades} unidades en total.";
 
         return redirect()->to('/admin/compras')->with('ok', $mensaje);
     }

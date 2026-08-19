@@ -19,6 +19,7 @@ $routes->get('logout', 'Auth::logout');
 // Páginas accesibles para ambos perfiles (admin y ventas): vender y consultar
 $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('productos', 'Productos::index');
+    $routes->get('productos/foto/(:segment)', 'Productos::foto/$1');
 
     $routes->get('stock/bajo', 'Stock::bajo');
 
@@ -99,6 +100,7 @@ $routes->group('', ['filter' => 'admin'], function ($routes) {
 
         $routes->get('informes/stock-valorizado', 'Admin\Informes::stockValorizado');
         $routes->get('informes/ventas-grafico',   'Admin\Informes::ventasGrafico');
+        $routes->get('informes/ranking-ventas',   'Admin\Informes::rankingVentas');
 
         $routes->get('eliminaciones', 'Admin\Eliminaciones::index');
     });

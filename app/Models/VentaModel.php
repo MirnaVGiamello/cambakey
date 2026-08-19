@@ -38,6 +38,17 @@ class VentaModel extends Model
         return $builder->groupBy('ventas.producto_id')->orderBy('total', 'DESC')->findAll();
     }
 
+    public function rankingPorDescripcion(array $filtros = []): array
+    {
+        $builder = $this->select('productos.descripcion, SUM(ventas.cantidad) AS unidades, SUM(ventas.cantidad * ventas.precio) AS total')
+            ->join('productos', 'productos.id = ventas.producto_id');
+
+        if (!empty($filtros['desde'])) $builder->where('ventas.fecha >=', $filtros['desde'] . ' 00:00:00');
+        if (!empty($filtros['hasta'])) $builder->where('ventas.fecha <=', $filtros['hasta'] . ' 23:59:59');
+
+        return $builder->groupBy('productos.descripcion')->orderBy('total', 'DESC')->findAll();
+    }
+
     public function serieTemporal(array $filtros = [], string $corte = 'dia'): array
     {
         $formato = $corte === 'mes' ? '%Y-%m' : '%Y-%m-%d';

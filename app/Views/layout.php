@@ -88,6 +88,7 @@
         <div class="collapse <?= $informesAbierto ? 'show' : '' ?>" id="navInformes">
           <a href="<?= site_url('admin/informes/stock-valorizado') ?>" class="nav-link nav-sub <?= str_contains($u, 'stock-valorizado') ? 'active' : '' ?>"><i class="bi bi-cash-stack"></i> Stock valorizado</a>
           <a href="<?= site_url('admin/informes/ventas-grafico') ?>"   class="nav-link nav-sub <?= str_contains($u, 'ventas-grafico') ? 'active' : '' ?>"><i class="bi bi-bar-chart-line"></i> Ventas (gráfico)</a>
+          <a href="<?= site_url('admin/informes/ranking-ventas') ?>"   class="nav-link nav-sub <?= str_contains($u, 'ranking-ventas') ? 'active' : '' ?>"><i class="bi bi-trophy"></i> Ranking de ventas</a>
           <a href="<?= site_url('admin/eliminaciones') ?>"              class="nav-link nav-sub <?= str_contains($u, 'eliminaciones') ? 'active' : '' ?>"><i class="bi bi-clock-history"></i> Eliminados</a>
         </div>
 
@@ -183,10 +184,21 @@ document.querySelectorAll('.money-input').forEach(function (input) {
 });
 
 document.querySelectorAll('form').forEach(function (form) {
-  form.addEventListener('submit', function () {
+  form.addEventListener('submit', function (e) {
+    if (e.defaultPrevented) return;
+
     form.querySelectorAll('.money-input').forEach(function (input) {
       if (input.value !== '') input.value = CB.parseMoney(input.value);
     });
+
+    // Evita grabar duplicados si se aprieta el botón más de una vez mientras se procesa.
+    if (form.method.toLowerCase() !== 'post') return;
+    const btn = form.querySelector('button[type="submit"], button:not([type])');
+    if (btn && !btn.disabled) {
+      const texto = btn.textContent.trim();
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm' + (texto ? ' me-1' : '') + '"></span>' + texto;
+    }
   });
 });
 

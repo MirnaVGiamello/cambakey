@@ -47,35 +47,53 @@ class Ventas extends BaseController
 
     public function guardar()
     {
-        $productoId = (int) $this->request->getPost('producto_id');
-        $cantidad   = (int) $this->request->getPost('cantidad');
-        $precio     = $this->limpiarMonto($this->request->getPost('precio')) ?? 0;
+        $productoIds = (array) $this->request->getPost('producto_id');
+        $cantidades  = (array) $this->request->getPost('cantidad');
+        $precios     = (array) $this->request->getPost('precio');
 
-        $producto = $this->productoModel->find($productoId);
-        if (!$producto || $cantidad <= 0) {
-            return redirect()->to('/ventas/nueva')->with('error', 'Datos de venta inválidos.')->withInput();
+        $lineas = [];
+        foreach ($productoIds as $i => $productoId) {
+            $cantidad = (int) ($cantidades[$i] ?? 0);
+            $precio   = $this->limpiarMonto($precios[$i] ?? null) ?? 0;
+            $producto = $this->productoModel->find((int) $productoId);
+
+            if (!$producto || $cantidad <= 0 || $precio <= 0) continue;
+
+            $lineas[] = ['producto' => $producto, 'cantidad' => $cantidad, 'precio' => $precio];
+        }
+
+        if (!$lineas) {
+            return redirect()->to('/ventas/nueva')->with('error', 'Agregá al menos un producto válido a la venta.')->withInput();
         }
 
         $db = db_connect();
         $db->transStart();
 
-        $this->model->insert([
-            'fecha'       => date('Y-m-d H:i:s'),
-            'producto_id' => $productoId,
-            'cantidad'    => $cantidad,
-            'precio'      => $precio,
-            'usuario_id'  => session()->get('usuario_id'),
-        ]);
-        $this->productoModel->decrementarStock($productoId, $cantidad);
+        $avisos = [];
+        foreach ($lineas as $l) {
+            $this->model->insert([
+                'fecha'       => date('Y-m-d H:i:s'),
+                'producto_id' => $l['producto']['id'],
+                'cantidad'    => $l['cantidad'],
+                'precio'      => $l['precio'],
+                'usuario_id'  => session()->get('usuario_id'),
+            ]);
+            $this->productoModel->decrementarStock($l['producto']['id'], $l['cantidad']);
+
+            $stockResultante = $l['producto']['stock_actual'] - $l['cantidad'];
+            if ($stockResultante < 0) {
+                $avisos[] = "\"{$l['producto']['descripcion']}\" quedó con stock negativo ({$stockResultante}).";
+            }
+        }
 
         $db->transComplete();
 
-        $stockResultante = $producto['stock_actual'] - $cantidad;
-        if ($stockResultante < 0) {
-            return redirect()->to('/ventas')->with('ok', "Venta registrada. Atención: el stock de \"{$producto['descripcion']}\" quedó negativo ({$stockResultante}).");
+        $mensaje = count($lineas) === 1 ? 'Venta registrada.' : 'Venta registrada: ' . count($lineas) . ' productos.';
+        if ($avisos) {
+            $mensaje .= ' Atención: ' . implode(' ', $avisos);
         }
 
-        return redirect()->to('/ventas')->with('ok', 'Venta registrada.');
+        return redirect()->to('/ventas')->with('ok', $mensaje);
     }
 
     public function eliminar(int $id)

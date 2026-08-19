@@ -44,6 +44,43 @@ class Informes extends BaseController
         ]);
     }
 
+    public function rankingVentas()
+    {
+        $filtros = [
+            'desde' => $this->request->getGet('desde') ?: date('Y-m-01'),
+            'hasta' => $this->request->getGet('hasta') ?: date('Y-m-d'),
+        ];
+        $vista  = $this->request->getGet('vista')  === 'detalle' ? 'detalle' : 'agrupado';
+        $medida = $this->request->getGet('medida') === 'pesos'   ? 'pesos'   : 'cantidad';
+
+        $ventaModel = new VentaModel();
+        $filas = $vista === 'detalle'
+            ? $ventaModel->resumenPorProducto($filtros)
+            : $ventaModel->rankingPorDescripcion($filtros);
+
+        $campoOrden = $medida === 'pesos' ? 'total' : 'unidades';
+        usort($filas, fn ($a, $b) => $b[$campoOrden] <=> $a[$campoOrden]);
+
+        $totalUnidades = array_sum(array_column($filas, 'unidades'));
+        $totalPesos    = array_sum(array_column($filas, 'total'));
+        $totalBase     = $medida === 'pesos' ? $totalPesos : $totalUnidades;
+
+        foreach ($filas as $i => &$f) {
+            $f['puesto']     = $i + 1;
+            $f['porcentaje'] = $totalBase > 0 ? ($f[$campoOrden] / $totalBase) * 100 : 0;
+        }
+        unset($f);
+
+        return view('admin/informes/ranking_ventas', [
+            'filtros'       => array_merge($filtros, ['vista' => $vista, 'medida' => $medida]),
+            'vista'         => $vista,
+            'medida'        => $medida,
+            'filas'         => $filas,
+            'totalUnidades' => $totalUnidades,
+            'totalPesos'    => $totalPesos,
+        ]);
+    }
+
     private function construirGrafico(array $serie, string $corte, string $medida): array
     {
         $campo   = $medida === 'pesos' ? 'total' : 'cantidad';

@@ -7,7 +7,7 @@ class ProductoModel extends Model
     protected $table         = 'productos';
     protected $allowedFields = [
         'tipo_producto_id', 'proveedor_id', 'descripcion', 'talle_id', 'color_id',
-        'observacion', 'costo', 'precio_venta', 'stock_actual', 'stock_minimo', 'activo',
+        'observacion', 'foto', 'costo', 'precio_venta', 'stock_actual', 'stock_minimo', 'activo',
     ];
     protected $useTimestamps = true;
 

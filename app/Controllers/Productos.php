@@ -169,7 +169,31 @@ class Productos extends BaseController
 
     public function actualizar(int $id)
     {
-        $this->model->update($id, $this->datosPost());
+        $foto = $this->guardarFoto();
+        if ($foto === false) {
+            return redirect()->to('/productos/editar/' . $id)->with('error', 'La foto debe ser JPG, PNG o WEBP de hasta 3 MB.')->withInput();
+        }
+
+        $datos = $this->datosPost();
+        if ($foto !== null) {
+            $datos['foto'] = $foto;
+        }
+
+        $this->model->update($id, $datos);
+
+        if ($foto !== null) {
+            $producto = $this->model->find($id);
+            $hermanos = $this->model
+                ->where('descripcion', $producto['descripcion'])
+                ->where('color_id', $producto['color_id'])
+                ->where('id !=', $id)
+                ->where('activo', 1)
+                ->findAll();
+
+            foreach ($hermanos as $h) {
+                $this->model->update($h['id'], ['foto' => $foto]);
+            }
+        }
 
         return redirect()->to('/productos')->with('ok', 'Producto actualizado.');
     }
@@ -179,5 +203,41 @@ class Productos extends BaseController
         $this->model->update($id, ['activo' => 0]);
 
         return redirect()->to('/productos')->with('ok', 'Producto dado de baja.');
+    }
+
+    /**
+     * Devuelve el nombre del archivo guardado, null si no se subió nada,
+     * o false si el archivo no pasó la validación.
+     */
+    private function guardarFoto(): string|false|null
+    {
+        $file = $this->request->getFile('foto');
+        if (!$file || $file->getError() === UPLOAD_ERR_NO_FILE) {
+            return null;
+        }
+
+        if (!$file->isValid() || !in_array($file->getClientMimeType(), ['image/jpeg', 'image/png', 'image/webp'], true) || $file->getSize() > 3 * 1024 * 1024) {
+            return false;
+        }
+
+        $destino = WRITEPATH . 'uploads/productos';
+        if (!is_dir($destino)) {
+            mkdir($destino, 0775, true);
+        }
+
+        $nombre = $file->getRandomName();
+        $file->move($destino, $nombre);
+
+        return $nombre;
+    }
+
+    public function foto(string $nombre)
+    {
+        $ruta = WRITEPATH . 'uploads/productos/' . basename($nombre);
+        if (!is_file($ruta)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return $this->response->setContentType(mime_content_type($ruta))->setBody(file_get_contents($ruta));
     }
 }

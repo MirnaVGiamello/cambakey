@@ -79,7 +79,7 @@
     <table class="table table-hover mb-0 small align-middle">
       <thead class="table-light">
         <tr>
-          <th>ID</th><th>Descripción</th><th class="d-none d-md-table-cell">Tipo</th><th class="d-none d-md-table-cell">Proveedor</th><th>Talle</th><th>Color</th>
+          <th></th><th>ID</th><th>Descripción</th><th class="d-none d-md-table-cell">Tipo</th><th class="d-none d-md-table-cell">Proveedor</th><th>Talle</th><th>Color</th>
           <?php if ($esAdmin): ?><th class="text-end d-none d-md-table-cell">Costo</th><?php endif ?>
           <th class="text-end">Precio</th><th class="text-center">Stock</th><?php if ($esAdmin): ?><th></th><?php endif ?>
         </tr>
@@ -87,6 +87,13 @@
       <tbody>
         <?php foreach ($productos as $p): ?>
         <tr>
+          <td>
+            <?php if (!empty($p['foto'])): ?>
+              <img src="<?= site_url('productos/foto/' . $p['foto']) ?>" alt="" style="width:32px;height:32px;object-fit:cover;border-radius:6px">
+            <?php else: ?>
+              <span class="text-muted"><i class="bi bi-image"></i></span>
+            <?php endif ?>
+          </td>
           <td><?= $p['id'] ?></td>
           <td><?= esc($p['descripcion']) ?></td>
           <td class="d-none d-md-table-cell"><?= esc($p['tipo_nombre']) ?></td>
@@ -111,7 +118,7 @@
         </tr>
         <?php endforeach ?>
         <?php if (empty($productos)): ?>
-        <tr><td colspan="10" class="text-center text-muted py-4">No hay productos que coincidan con la búsqueda.</td></tr>
+        <tr><td colspan="11" class="text-center text-muted py-4">No hay productos que coincidan con la búsqueda.</td></tr>
         <?php endif ?>
       </tbody>
     </table>
